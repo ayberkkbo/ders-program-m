@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Notları ve Görev Yöneticisi</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C5CE7;
+            --secondary: #A8A4FF;
+            --accent: #FF7675;
+            --background: #F8F9FF;
+            --text: #2D3436;
+            --success: #00B894;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: radial-gradient(circle at top, var(--background), #ffffff);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: 2.8rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .course-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(108, 92, 231, 0.1);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .course-time {
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+        }
+
+        .course-code {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .notes-section {
+            margin-top: 1.5rem;
+            border-top: 2px solid var(--secondary);
+            padding-top: 1rem;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--secondary);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .note-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(168, 164, 255, 0.3);
+        }
+
+        .notes-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .note-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            background: rgba(168, 164, 255, 0.05);
+            border-radius: 10px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .check-button {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            margin-right: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .check-button.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .check-button.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(108, 92, 231, 0.1);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .floating-add {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .floating-add:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Akademik Organizer</h1>
+        </div>
+
+        <div class="grid" id="courseGrid">
+            <!-- Ders kartları buraya eklenecek -->
+        </div>
+
+        <div class="floating-add" id="addNoteButton">
+            <i class='bx bx-plus' style="color: white; font-size: 2rem;"></i>
+        </div>
+    </div>
+
+    <script>
+        const courses = [
+            {
+                code: "EHM4230",
+                name: "Mikrodalga 2",
+                time: "Salı 14.00-16.00",
+                room: "B022",
+                notes: []
+            },
+            {
+                code: "EHM4160",
+                name: "Uydu Sistemleri",
+                time: "Perşembe 16.00-18.00",
+                room: "B152",
+                notes: []
+            },
+            {
+                code: "EHM4850",
+                name: "Haberleşme Teorisi",
+                time: "Cuma 09.00-11.00",
+                room: "B152",
+                notes: []
+            }
+        ];
+
+        function createCourseCard(course) {
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            card.innerHTML = `
+                <div class="course-header">
+                    <div>
+                        <h2>${course.name}</h2>
+                        <div class="course-code">${course.code} | ${course.room}</div>
+                    </div>
+                    <div class="course-time">${course.time}</div>
+                </div>
+                <div class="notes-section">
+                    <ul class="notes-list" data-course="${course.code}"></ul>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function updateProgress(courseCode) {
+            const notes = JSON.parse(localStorage.getItem(courseCode)) || [];
+            const completed = notes.filter(note => note.checked).length;
+            const progress = (completed / notes.length) * 100 || 0;
+            document.querySelector(`[data-course="${courseCode}"] + .progress-bar .progress-fill`).style.width = `${progress}%`;
+        }
+
+        function renderNotes(courseCode) {
+            const notesList = document.querySelector(`[data-course="${courseCode}"]`);
+            notesList.innerHTML = '';
+            const notes = JSON.parse(localStorage.getItem(courseCode)) || [];
+            
+            notes.forEach((note, index) => {
+                const li = document.createElement('li');
+                li.className = 'note-item';
+                li.innerHTML = `
+                    <div class="check-button ${note.checked ? 'checked' : ''}"></div>
+                    <div class="note-text">${note.text}</div>
+                `;
+                
+                li.querySelector('.check-button').addEventListener('click', () => {
+                    notes[index].checked = !notes[index].checked;
+                    localStorage.setItem(courseCode, JSON.stringify(notes));
+                    updateProgress(courseCode);
+                    li.querySelector('.check-button').classList.toggle('checked');
+                });
+                
+                notesList.appendChild(li);
+            });
+        }
+
+        document.getElementById('addNoteButton').addEventListener('click', () => {
+            const courseCode = prompt('Not eklemek istediğiniz ders kodunu girin:');
+            if (courseCode) {
+                const noteText = prompt('Notunuzu yazın:');
+                if (noteText) {
+                    const notes = JSON.parse(localStorage.getItem(courseCode)) || [];
+                    notes.push({ text: noteText, checked: false });
+                    localStorage.setItem(courseCode, JSON.stringify(notes));
+                    renderNotes(courseCode);
+                    updateProgress(courseCode);
+                }
+            }
+        });
+
+        // İlk yükleme
+        const grid = document.getElementById('courseGrid');
+        courses.forEach(course => {
+            grid.appendChild(createCourseCard(course));
+            renderNotes(course.code);
+            updateProgress(course.code);
+        });
+    </script>
+</body>
+</html>
